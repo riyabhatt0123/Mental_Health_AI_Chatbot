@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindMate</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      /* Enhanced background color: a softer, more vibrant gradient */
+      background: linear-gradient(to right bottom, #a7e9f7, #84d8f0); /* More vibrant light blue to cyan */
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #333; /* Default text color */
+      overflow: auto; /* Prevent body scrollbars */
+    }
+
+    .container {
+      max-width: 800px;
+      width: 95%;
+      margin: 20px auto;
+      background: rgb(241, 242, 242);
+      padding: 28px; /* Slightly more padding */
+      border-radius: 20px; /* Even more rounded corners */
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15); /* Stronger, softer shadow */
+      display: flex;
+      flex-direction: column;
+      min-height: 85vh;
+      position: relative; /* For absolute positioning of elements if needed */
+    }
+
+    h1 {
+      text-align: center;
+      color: #00796b; /* Dark teal */
+      margin-bottom: 25px; /* More space below heading */
+      /* --- START OF CHANGES FOR H1 --- */
+      font-weight: 900; /* Made even bolder */
+      letter-spacing: -1.5px; /* Slightly tighter letter spacing for impact */
+      font-size: 3.5rem; /* Significantly larger heading */
+      font-family: 'Playfair Display', serif; /* Dramatic font */
+      text-shadow: 2px 2px 5px rgba(0,0,0,0.15); /* More pronounced text shadow */
+      /* --- END OF CHANGES FOR H1 --- */
+    }
+
+    .header-controls {
+        display: flex;
+        justify-content: space-between; /* Pushes content to ends */
+        align-items: center;
+        margin-bottom: 25px; /* More space below controls */
+        flex-wrap: wrap; /* Allow wrapping on smaller screens */
+        gap: 15px; /* Increased gap */
+    }
+
+    /* New flex containers for better grouping and alignment */
+    .header-left-group {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .header-right-group {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .language-selector select {
+        padding: 12px 16px; /* Larger padding */
+        border-radius: 12px; /* More rounded */
+        border: 1px solid #c0d0e0; /* Slightly darker border */
+        font-size: 17px; /* Larger font */
+        background-color: white;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Cpath%20fill%3D%22%232C3E50%22%20d%3D%22M7%209.5L2.5%205h9L7%209.5z%22%2F%3E%3C%2Fsvg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center; /* Adjusted position */
+        background-size: 12px; /* Larger arrow */
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08); /* Subtle shadow */
+        transition: all 0.3s ease;
+    }
+    .language-selector select:hover {
+        border-color: #00796b;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    .voice-toggle-btn {
+        padding: 12px 20px; /* Larger padding */
+        border: none;
+        border-radius: 12px; /* More rounded */
+        cursor: pointer;
+        color: white;
+        font-size: 17px;
+        font-weight: 600;
+        background-color: #ff9800; /* Orange */
+        transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.15); /* More pronounced shadow */
+    }
+
+    .voice-toggle-btn.active {
+        background-color: #4CAF50; /* Green when active */
+    }
+
+    .voice-toggle-btn:hover {
+        background-color: #e68900; /* Darker orange on hover */
+        transform: translateY(-3px); /* More pronounced lift */
+        box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    }
+    .voice-toggle-btn.active:hover {
+        background-color: #388E3C; /* Darker green on hover */
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    }
+
+    .games {
+      display: flex;
+      justify-content: center; /* Centered within its flex container */
+      gap: 10px; /* Adjusted gap for better fit with logout button */
+      flex-wrap: wrap;
+    }
+
+    .games a {
+      background: linear-gradient(to right, #4db6ac, #26a69a); /* Gradient for games buttons */
+      color: white;
+      padding: 10px 18px; /* Slightly smaller padding for better fit */
+      border-radius: 12px; /* More rounded */
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+      text-transform: uppercase; /* Uppercase text */
+      letter-spacing: 0.5px;
+      font-size: 0.95rem; /* Slightly smaller font */
+    }
+
+    .games a:hover {
+      background: linear-gradient(to right, #00796b, #004d40); /* Darker gradient on hover */
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+    }
+
+    /* Logout Button Styling */
+    .logout-button {
+        background-color: #dc3545; /* Red for logout */
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 17px;
+        font-weight: 600;
+        text-decoration: none; /* Ensure it looks like a button, not just a link */
+        display: inline-flex; /* Use flex for icon/text alignment */
+        align-items: center;
+        gap: 8px; /* Space between icon and text */
+        transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    }
+    .logout-button:hover {
+        background-color: #c82333;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    }
+
+
+    #chat-box {
+      flex-grow: 1;
+      overflow-y: auto; /* THIS IS THE KEY PROPERTY for vertical scrolling */
+      
+      /* Chatbox background: a calming, slightly textured gradient */
+      background: linear-gradient(to bottom right, #f7fcfc, #e0f2f2); /* Light blue-green gradient */
+      border: 2px solid #b2dfdb; /* More prominent, calming border */
+      padding: 25px;
+      border-radius: 18px; /* Slightly more rounded */
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column; /* Messages will stack vertically */
+      gap: 15px; /* Spacing between messages */
+      /* Enhanced shadow for chatbox */
+      box-shadow: inset 0 0 15px rgba(0, 121, 107, 0.1), 0 8px 20px rgba(0,0,0,0.1); /* Deeper inner and outer shadow */
+    }
+
+    /* Custom scrollbar for Webkit browsers */
+    #chat-box::-webkit-scrollbar {
+        width: 10px;
+    }
+    #chat-box::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    #chat-box::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+    #chat-box::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+    /* FIX: Simplified message alignment using margin auto */
+    .user-message, .bot-message {
+      padding: 14px 20px;
+      border-radius: 25px; /* Even more rounded, pill-like */
+      max-width: 78%; /* Limit message width */
+      word-wrap: break-word;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.12); /* Slightly stronger message shadow */
+      line-height: 1.5;
+      font-size: 1.05rem;
+      transition: all 0.2s ease-in-out; /* Smooth transition for message appearance */
+    }
+
+    /* Subtle hover effect for messages (optional, but adds interactivity) */
+    .user-message:hover, .bot-message:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 12px rgba(0,0,0,0.15);
+    }
+
+    .user-message {
+      background: linear-gradient(to right, #d4edda, #cce8d0); /* Softer, slightly darker green */
+      color: #1a202c;
+      text-align: left; /* Text inside bubble is left-aligned */
+      border: 1px solid #b3d9b3; /* Matching border */
+      margin-left: auto; /* Pushes the user message to the right */
+    }
+
+    .bot-message {
+      background: linear-gradient(to left, #e0f2f7, #f0fdfd); /* Light blue to very light blue */
+      color: #2d3748;
+      text-align: left; /* Text inside bubble is left-aligned */
+      border: 1px solid #cce7e7; /* Matching border */
+      margin-right: auto; /* Pushes the bot message to the left */
+    }
+
+    .input-area {
+      display: flex;
+      gap: 15px;
+      padding-top: 20px;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 16px 22px;
+      font-size: 18px;
+      border-radius: 30px;
+      border: 1px solid #a0aec0;
+      outline: none;
+      transition: all 0.3s ease;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    input[type="text"]:focus {
+      border-color: #00796b;
+      box-shadow: 0 0 0 5px rgba(0, 121, 107, 0.3), inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* FIX: Added min-width to buttons within input-area */
+    .input-area button { /* Specificity for buttons in input-area */
+      min-width: 60px; /* Ensure buttons don't shrink to zero width */
+      flex-shrink: 0; /* Prevents buttons from shrinking */
+      flex-grow: 0;   /* Prevents buttons from growing */
+      padding: 16px 36px; /* Adjusted padding for even broader buttons */
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      color: white;
+      font-size: 18px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    }
+
+
+    #send-btn {
+      background-color: #00796b;
+    }
+
+    #send-btn:hover {
+      background-color: #004d40;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+    }
+
+    #mic-btn {
+      background-color: #ff9800;
+    }
+
+    #mic-btn:hover {
+      background-color: #e68900;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+    }
+
+    #voice-status {
+      margin-top: 15px;
+      font-size: 15px;
+      color: #6b7280;
+      text-align: center;
+    }
+
+    .loading-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #6b7280;
+      margin-top: 5px;
+      justify-content: flex-start;
+    }
+
+    .loading-indicator span {
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) { /* Adjusted breakpoint for better tablet support */
+      .container {
+        margin: 10px auto;
+        padding: 15px;
+        min-height: 95vh;
+        border-radius: 10px;
+        box-shadow: none;
+      }
+      .header-controls {
+          flex-direction: column; /* Stack controls vertically */
+          align-items: stretch; /* Stretch items to fill width */
+          gap: 10px;
+      }
+      .header-left-group, .header-right-group {
+          flex-direction: column;
+          align-items: stretch;
+          width: 100%; /* Take full width */
+          gap: 10px;
+      }
+      .language-selector select, .voice-toggle-btn, .logout-button { /* Added logout-button here */
+          width: 100%;
+          padding: 10px 14px;
+          border-radius: 8px;
+      }
+      .games {
+          flex-direction: column; /* Stack game buttons */
+          width: 100%;
+          gap: 10px;
+      }
+      .games a {
+          width: 100%;
+          text-align: center;
+          padding: 10px 15px;
+          border-radius: 8px;
+      }
+      h1 {
+        font-size: 2rem;
+        margin-bottom: 20px;
+      }
+      #chat-box {
+        padding: 15px;
+        gap: 10px;
+        max-height: calc(95vh - 300px); 
+      }
+      .user-message, .bot-message {
+        padding: 10px 15px;
+        border-radius: 18px;
+        max-width: 90%; /* Allow messages to be a bit wider */
+        margin-left: 0; /* Remove margin auto on mobile when they stack */
+        margin-right: 0; /* Remove margin auto on mobile when they stack */
+      }
+      .input-area {
+        flex-direction: column;
+        gap: 10px;
+      }
+      input[type="text"], #mic-btn, #send-btn { /* Apply these to both buttons */
+        width: 100%;
+        padding: 12px 18px;
+        border-radius: 24px;
+      }
+      /* Ensure min-width doesn't break full width on mobile */
+      .input-area button {
+        min-width: unset; /* Remove min-width on mobile when they stack */
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+      <img src="{{ url_for('static', filename='logo.jpg') }}" alt="MindMate Logo" style="height: 40px;">
+      <span style="font-size: 30px; font-family: 'Playfair Display', serif; font-weight: 900; color: #00796b;">
+        MindMate
+      </span>
+    </div>
+    
+
+    <div class="header-controls">
+        <div class="header-left-group">
+            <div class="language-selector">
+                <label for="language-select" class="sr-only">Select Language</label>
+                <select id="language-select">
+                    <option value="en">English</option>
+                    <option value="hi">Hindi (हिंदी)</option>
+                    <option value="mr">Marathi (मराठी)</option>
+                    <option value="bn">Bengali (বাংলা)</option>
+                    <option value="ta">Tamil (தமிழ்)</option>
+                    <option value="te">Telugu (తెలుగు)</option>
+                    <option value="kn">Kannada (ಕನ್ನಡ)</option>
+                    <option value="ml">Malayalam (മലയാളം)</option>
+                    <option value="gu">Gujarati (ગુજરાતી)</option>
+                    <option value="pa">Punjabi (ਪੰਜਾਬੀ)</option>
+                    <option value="fr">French (Français)</option>
+                    <option value="es">Spanish (Español)</option>
+                    <option value="de">German (Deutsch)</option>
+                    <option value="zh-CN">Chinese (简体中文)</option>
+                </select>
+            </div>
+            <button id="voice-toggle-btn" class="voice-toggle-btn active" onclick="toggleVoice()">🔊 Voice ON</button>
+        </div>
+
+        <div class="header-right-group">
+            <div class="games">
+                <a href="/snake">🏝 Snake</a>
+                <a href="/mindquest">🎮 MindQuest</a>
+                <a href="/game2048">🔢 2048</a>
+                <a href="/perplexus">🌀 Perplexus</a> </div>
+            <a href="/logout" id="logout-btn" class="logout-button"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+
+    <div id="chat-box">
+      <div class="bot-message">👋 Hello! I'm Rini, and I'm here for you. How are you feeling today?</div>
+    </div>
+
+    <div class="input-area">
+      <input type="text" id="user-input" placeholder="Type your message here..." aria-label="Chat input">
+      <button id="mic-btn" onclick="startListening()" aria-label="Start voice input">🎤</button>
+      <button id="send-btn" onclick="sendMessage()" aria-label="Send message">✈️</button>
+    </div>
+
+    <div id="voice-status"></div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+  <script>
+    // Allow Enter key to send messages
+    document.getElementById('user-input').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    // No dropdown JS logic needed here for the simple logout button
+    // The scrolling logic is handled within chat.js
+  </script>
+</body>
+</html>

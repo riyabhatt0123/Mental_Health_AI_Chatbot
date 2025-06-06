@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🐍 Snake Game</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    /* General body styling for the game page */
+    body {
+      font-family: 'Inter', sans-serif; /* Using Inter font */
+      background: linear-gradient(to top, #e0ffe0, #c0f0c0); /* Calming green gradient */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      color: #333;
+      overflow: auto; /* Prevent scrollbars */
+    }
+
+    .game-container {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      max-width: 600px; /* Limit max width for larger screens */
+      width: 95%; /* Responsive width */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      position: relative; /* For overlay positioning */
+    }
+
+    h1 {
+      color: #2e8b57; /* Sea green */
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .score-display {
+      background: #3cb371; /* Medium sea green */
+      color: white;
+      padding: 8px 15px;
+      border-radius: 8px;
+      font-size: 1.2em;
+      font-weight: bold;
+      min-width: 120px;
+      text-align: center;
+    }
+
+    #gameCanvas {
+      background-color: #a2d2ff; /* Light blue background for canvas */
+      border: 2px solid #2e8b57; /* Sea green border */
+      border-radius: 8px;
+      display: block;
+      touch-action: none; /* Prevent default touch actions like scrolling */
+      /* Set explicit width/height here as a fallback/initial state */
+      width: 400px; /* Initial display width */
+      height: 400px; /* Initial display height */
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .control-button {
+      padding: 10px 20px;
+      background: #ff9800; /* Orange */
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: bold;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .control-button:hover {
+      background: #e68900; /* Darker orange */
+      transform: translateY(-2px);
+    }
+
+    .nav-button {
+      display: inline-block;
+      margin-top: 25px;
+      text-decoration: none;
+      background: #ff9800; /* Orange */
+      padding: 12px 25px;
+      color: white;
+      border-radius: 10px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      font-size: 1em;
+      font-weight: bold;
+    }
+    .nav-button:hover {
+      background: #e68900; /* Darker orange */
+      transform: translateY(-2px);
+    }
+
+    /* Game Overlay for Win/Lose */
+    .game-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 100;
+        font-size: 1.8em;
+        font-weight: bold;
+        color: #333;
+        text-align: center;
+        animation: fadeIn 0.5s ease-out;
+    }
+    .game-overlay button {
+        margin-top: 20px;
+        padding: 15px 30px;
+        font-size: 1.2em;
+        border-radius: 10px;
+        background: #2e8b57; /* Sea green */
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .game-overlay button:hover {
+        background: #226644;
+        transform: translateY(-3px);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      .game-container {
+        padding: 15px;
+      }
+      h1 {
+        font-size: 2em;
+      }
+      #gameCanvas {
+        height: 300px; /* Smaller canvas on mobile */
+        width: 300px; /* Keep square */
+      }
+      .score-display {
+        font-size: 1em;
+        padding: 6px 10px;
+      }
+      .control-button, .nav-button {
+        padding: 10px 20px;
+        font-size: 0.9em;
+      }
+      .game-overlay {
+          font-size: 1.4em;
+          padding: 10px;
+      }
+      .game-overlay button {
+          padding: 10px 20px;
+          font-size: 1em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container" id="game-container">
+    <h1>🐍 Snake Game</h1>
+    <div class="score-display">Score: <span id="score">0</span></div>
+    <canvas id="gameCanvas" width="400" height="400"></canvas> <div class="controls">
+      <button id="startGameBtn" class="control-button">Start Game</button>
+      <button id="resetGameBtn" class="control-button">Reset Game</button>
+    </div>
+  </div>
+
+  <a href="/chat" class="nav-button">🔙 Back to Chat</a>
+
+  <script src="{{ url_for('static', filename='js/snake.js') }}"></script>
+  <script>
+    // Simple check to see if snake.js was loaded
+    // This script runs AFTER snake.js is theoretically loaded.
+    // If initializeGame is not found, it means snake.js either failed to load
+    // or had a syntax error that prevented the function from being defined.
+    if (typeof initializeGame === 'function') {
+      console.log("snake.js appears to be loaded and initializeGame is defined.");
+    } else {
+      console.error("CRITICAL ERROR: snake.js might not be loaded or has an error preventing initializeGame from being defined.");
+    }
+  </script>
+</body>
+</html>

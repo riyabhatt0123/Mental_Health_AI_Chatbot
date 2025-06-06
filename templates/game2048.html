@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048 Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom right, #fceabb, #f8b500); /* Warm orange gradient */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+            overflow: auto; /* Allow scrolling if content is too large */
+        }
+
+        .game-container {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 500px; /* Max width for the game area */
+            width: 95%; /* Responsive width */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            position: relative; /* CRUCIAL: Establishes a positioning context for the overlay */
+        }
+
+        h1 {
+            color: #d35400; /* Darker orange for heading */
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        #score-board {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 10px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #555;
+            flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+            gap: 10px; /* Space between score/best/timer items */
+        }
+
+        #score-board > div {
+            background: #f1c40f; /* Yellow for score */
+            padding: 8px 15px;
+            border-radius: 8px;
+            color: #333;
+            flex-grow: 1; /* Allow items to grow and fill space */
+            text-align: center;
+            min-width: 90px; /* Adjusted min-width for better wrapping */
+        }
+
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 10px;
+            background-color: #bbada0; /* 2048 board background */
+            border-radius: 8px;
+            padding: 10px; /* Keep your padding */
+            width: 100%; /* Make it take 100% of its parent's width */
+            aspect-ratio: 1 / 1; /* Keep it square regardless of width */
+            position: relative; /* CRUCIAL: For absolute positioning of tiles */
+            box-sizing: border-box; /* Ensure padding and border are included in the width */
+            max-width: 400px; /* Add this back to set an upper limit for large screens */
+        }
+
+        .grid-cell {
+            background-color: rgba(238, 228, 218, 0.35); /* Empty cell background */
+            border-radius: 5px;
+        }
+
+        .tile {
+            position: absolute; /* Position tiles absolutely within the game-board */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #776e65;
+            border-radius: 5px; /* Match cell border-radius */
+            transition: transform 0.1s ease-out, background-color 0.1s ease-out, color 0.1s ease-out;
+            z-index: 10; /* Ensure tiles are above grid cells */
+        }
+
+        /* Tile colors - you'll need to add more for higher values */
+        .tile-2 { background-color: #eee4da; color: #776e65; }
+        .tile-4 { background-color: #ede0c8; color: #776e65; }
+        .tile-8 { background-color: #f2b179; color: #f9f6f2; }
+        .tile-16 { background-color: #f59563; color: #f9f6f2; }
+        .tile-32 { background-color: #f67c5f; color: #f9f6f2; }
+        .tile-64 { background-color: #f65e3b; color: #f9f6f2; }
+        .tile-128 { background-color: #edcf72; color: #f9f6f2; font-size: 2em; }
+        .tile-256 { background-color: #edcc61; color: #f9f6f2; font-size: 2em; }
+        .tile-512 { background-color: #edc850; color: #f9f6f2; font-size: 2em; }
+        .tile-1024 { background-color: #edc53f; color: #f9f6f2; font-size: 1.5em; }
+        .tile-2048 { background-color: #edc22e; color: #f9f6f2; font-size: 1.5em; }
+        /* Add more as needed */
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .control-button {
+            padding: 10px 20px;
+            background: #ff9800; /* Orange */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .control-button:hover {
+            background: #e68900; /* Darker orange */
+            transform: translateY(-2px);
+        }
+
+        .nav-button {
+            display: inline-block;
+            margin-top: 25px;
+            text-decoration: none;
+            background: #ff9800; /* Orange */
+            padding: 12px 25px;
+            color: white;
+            border-radius: 10px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-size: 1em;
+            font-weight: bold;
+        }
+        .nav-button:hover {
+            background: #e68900; /* Darker orange */
+            transform: translateY(-2px);
+        }
+
+        /* Styles for the game overlay */
+        .game-overlay {
+            position: absolute; /* Position relative to the nearest positioned ancestor (.game-container) */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Center content vertically */
+            align-items: center; /* Center content horizontally */
+            z-index: 100; /* Ensure it's on top of game elements */
+            border-radius: 15px; /* Match game container border-radius */
+            text-align: center;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #d35400; /* Example color for the message */
+            padding: 20px; /* Add some padding around the text */
+            box-sizing: border-box; /* Ensure padding is included in width/height */
+        }
+
+        .game-overlay p {
+            margin-bottom: 20px;
+            font-size: 1em; /* Adjust text size within overlay */
+            color: #333; /* Darker color for the message text */
+        }
+
+        .game-overlay button {
+            padding: 12px 25px;
+            background: #ff9800; /* Orange button */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-overlay button:hover {
+            background: #e68900; /* Darker orange on hover */
+            transform: translateY(-2px);
+        }
+
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            /* The tile calculations in JS will now handle board sizing,
+               so fixed width/height for #game-board here are less critical
+               but max-width remains useful for larger screens. */
+            .tile {
+                font-size: 2em;
+            }
+            .tile-128, .tile-256, .tile-512, .tile-1024, .tile-2048 {
+                font-size: 1.5em;
+            }
+            .control-button, .nav-button {
+                padding: 10px 20px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🔢 2048 Game</h1>
+        <div id="score-board">
+            <div>Score: <span id="score">0</span></div>
+            <div>Best: <span id="best-score">0</span></div>
+            <div id="timer-display">Time: 01:00</div>
+        </div>
+        <div id="game-board"></div>
+        <div class="controls">
+            <button id="new-game-btn" class="control-button">New Game</button>
+        </div>
+    </div>
+
+    <a href="/chat" class="nav-button">🔙 Back to Chat</a>
+
+    <script src="{{ url_for('static', filename='js/game2048.js') }}"></script>
+</body>
+</html>

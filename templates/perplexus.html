@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌀 Perplexus Portal</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    /* General body styling for the game page */
+    body {
+      font-family: 'Inter', sans-serif; /* Using Inter font */
+      background: linear-gradient(to bottom right, #a7e9f7, #84d8f0); /* Soft blue gradient */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      color: #333;
+      overflow: hidden; /* Prevent scrollbars */
+    }
+
+    .game-container {
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      max-width: 800px; /* Adjust max width as needed */
+      width: 95%; /* Responsive width */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      position: relative; /* For overlay positioning */
+    }
+
+    h1 {
+      color: #00796b;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    #game-canvas {
+      width: 100%; /* Make canvas responsive to its container */
+      height: 400px; /* Fixed height, or adjust as needed */
+      background-color: #f0f0f0; /* Placeholder background */
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+      display: block; /* Remove extra space below canvas */
+      touch-action: none; /* Prevent default touch actions like scrolling/zooming */
+    }
+    
+    #loading-message {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #555;
+        font-size: 1.2em;
+        z-index: 50; /* Below overlay, above canvas */
+    }
+
+    .game-info {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .score-display, .level-display {
+      background: #4db6ac;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 8px;
+      font-size: 1.1em;
+      font-weight: bold;
+      min-width: 120px;
+      text-align: center;
+      
+    }
+
+    .controls-info {
+      margin-top: 15px;
+      font-size: 0.9em;
+      color: #666;
+      text-align: center;
+    }
+
+    .control-button {
+      padding: 10px 20px;
+      background: #ff9800; /* Orange */
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: bold;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      margin-top: 20px;
+    }
+    .control-button:hover {
+      background: #e68900; /* Darker orange */
+      transform: translateY(-2px);
+    }
+
+    .nav-button {
+      display: inline-block;
+      margin-top: 25px;
+      text-decoration: none;
+      background: #ff9800; /* Orange */
+      padding: 12px 25px;
+      color: white;
+      border-radius: 10px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      font-size: 1em;
+      font-weight: bold;
+    }
+    .nav-button:hover {
+      background: #e68900; /* Darker orange */
+      transform: translateY(-2px);
+    }
+
+    /* Game Overlay for Win/Lose */
+    .game-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 100;
+        font-size: 1.8em;
+        font-weight: bold;
+        color: #333;
+        text-align: center;
+        animation: fadeIn 0.5s ease-out;
+    }
+    .game-overlay button {
+        margin-top: 20px;
+        padding: 15px 30px;
+        font-size: 1.2em;
+        border-radius: 10px;
+        background: #00796b;
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .game-overlay button:hover {
+        background: #004d40;
+        transform: translateY(-3px);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      .game-container {
+        padding: 15px;
+      }
+      h1 {
+        font-size: 2em;
+      }
+      #game-canvas {
+        height: 300px; /* Smaller canvas on mobile */
+      }
+      .game-info {
+        flex-direction: column;
+        gap: 10px;
+      }
+      .score-display, .level-display {
+        font-size: 1em;
+        padding: 6px 10px;
+        min-width: unset;
+      }
+      .control-button, .nav-button {
+        padding: 10px 20px;
+        font-size: 0.9em;
+      }
+      .game-overlay {
+          font-size: 1.4em;
+          padding: 10px;
+      }
+      .game-overlay button {
+          padding: 10px 20px;
+          font-size: 1em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container" id="game-container">
+    <h1>🌀 Perplexus Portal</h1>
+    <canvas id="game-canvas"></canvas>
+    <div id="loading-message">Loading 3D game...</div> <div class="game-info">
+      <div class="score-display">Score: <span id="score">0</span></div>
+      <div class="level-display">Level: <span id="level">1</span></div>
+      <div class="timer-display" style="
+    background: #4db6ac;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-size: 1.1em;
+    font-weight: bold;
+    min-width: 120px;
+    text-align: center;
+">Time Left: <span id="timer-display">30s</span></div>
+    </div>
+    <div class="controls-info">Use Arrow Keys to tilt the maze! Drag mouse to rotate camera.</div>
+    <button id="reset-game-btn" class="control-button">Reset Level</button>
+  </div>
+
+  <a href="/chat" class="nav-button">🔙 Back to Chat</a>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+  
+  <script src="{{ url_for('static', filename='js/perplexus.js') }}"></script>
+</body>
+</html>

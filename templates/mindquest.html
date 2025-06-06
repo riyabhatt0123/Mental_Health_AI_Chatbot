@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🧠 Mind Quest Game</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container mindquest-container"> <header class="mq-header">
+      <h1 class="mq-title">Mind Quest</h1>
+      <p class="mq-tagline">Your journey to a calmer mind.</p>
+    </header>
+
+    <div id="mq-scene" class="mq-scene">
+      <div class="mq-progress-container">
+        <div id="mq-progress-bar" class="mq-progress-bar"></div>
+      </div>
+    </div>
+
+    <div id="mq-task-box" class="mq-task-box">
+      Loading Mind Quest...
+    </div>
+
+    <footer class="mq-footer">
+      <a href="/" class="mq-button mq-back-button">🔙 Back to Chat</a>
+      <p class="mq-copyright">© 2025 Mind Quest. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/mindquest.js') }}"></script>
+</body>
+</html>
